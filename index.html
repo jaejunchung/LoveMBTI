@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="20개의 연애 밸런스 게임으로 내가 바라는 애인의 MBTI 유형을 찾는 테스트.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%92%8C%3C/text%3E%3C/svg%3E">
+<link rel="canonical" href="https://jaejunchung.github.io/LoveMBTI/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jaejunchung.github.io/LoveMBTI/">
+<meta property="og:title" content="애인의 MBTI 이상형">
+<meta property="og:description" content="둘 다 짜증나는 두 상황 중 더 화나는 쪽을 고르면, 내가 바라는 애인의 네 글자가 나옵니다.">
+<meta property="og:image" content="https://jaejunchung.github.io/LoveMBTI/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<title>애인의 MBTI 이상형</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* 레이아웃: 중앙 620px 단일 컬럼. 한 화면에 한 문항, A/B 카드를 세로로 쌓고 상단에 진행바. */
+:root{
+  --bg:#F4EFF3; --surface:#FFFFFF; --surface-2:#FBF6F9;
+  --ink:#241C2C; --ink-soft:#6B5F77; --line:#E4D9E3;
+  --accent:#C32F5E; --accent-weak:#F7E1E9; --blue:#4552A8;
+  --shadow:0 1px 2px rgba(36,28,44,.06), 0 8px 24px rgba(36,28,44,.07);
+  --font-display:'Gowun Batang', 'Nanum Myeongjo', serif;
+  --font-body:'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16121D; --surface:#1F1829; --surface-2:#271F34;
+    --ink:#EFE7F2; --ink-soft:#AC9FB8; --line:#352B44;
+    --accent:#FF7A9C; --accent-weak:#3A2232; --blue:#97A3F5;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16121D; --surface:#1F1829; --surface-2:#271F34;
+  --ink:#EFE7F2; --ink-soft:#AC9FB8; --line:#352B44;
+  --accent:#FF7A9C; --accent-weak:#3A2232; --blue:#97A3F5;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px rgba(0,0,0,.35);
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--font-body); font-size:16px; line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{
+  max-width:640px; margin:0 auto;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:40px 64px;
+}
+.screen{display:flex; flex-direction:column; gap:20px}
+h1,h2,h3{font-family:var(--font-display); font-weight:700; text-wrap:balance; margin:0; line-height:1.35}
+h1{font-size:clamp(30px,7vw,42px); letter-spacing:-.01em}
+p{margin:0}
+b{font-weight:600}
+.eyebrow{
+  font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--accent); font-weight:600;
+}
+.lede{color:var(--ink-soft); font-size:15.5px}
+.rule{height:1px; background:var(--line); border:0; margin:0}
+
+/* 시작 화면 */
+.howto{
+  list-style:none; margin:0; padding:20px; display:flex; flex-direction:column; gap:10px;
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  font-size:14.5px; color:var(--ink-soft);
+}
+.howto li{display:flex; gap:10px; align-items:flex-start}
+.howto li::before{
+  content:""; flex:0 0 6px; width:6px; height:6px; border-radius:50%;
+  background:var(--accent); margin-top:11px;
+}
+button{font-family:inherit; font-size:inherit; cursor:pointer}
+.btn-primary{
+  align-self:flex-start; background:var(--accent); color:#fff; border:0;
+  padding:14px 30px; border-radius:999px; font-weight:600; letter-spacing:.02em;
+  transition:transform .15s ease, filter .15s ease;
+}
+.btn-primary:hover{transform:translateY(-1px); filter:brightness(1.06)}
+.btn-ghost{
+  align-self:flex-start; background:none; border:0; color:var(--ink-soft);
+  padding:6px 0; font-size:14px;
+}
+.btn-ghost:hover{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:6px}
+
+/* 문항 화면 */
+.meta{
+  display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  font-size:12px; letter-spacing:.1em; color:var(--ink-soft);
+}
+.qnum{font-variant-numeric:tabular-nums}
+.qnum b{color:var(--accent); font-weight:600}
+.tag{
+  font-size:11.5px; letter-spacing:.12em; color:var(--blue);
+  border:1px solid var(--line); border-radius:999px; padding:3px 11px; background:var(--surface);
+}
+.bar{height:3px; background:var(--line); border-radius:999px; overflow:hidden}
+.bar-fill{height:100%; width:5%; background:var(--accent); transition:width .35s cubic-bezier(.4,0,.2,1)}
+.q-title{font-size:clamp(22px,5.2vw,28px); margin-top:8px}
+.q-sub{font-size:14px; color:var(--ink-soft)}
+.options{display:flex; flex-direction:column; gap:12px}
+.opt{
+  display:flex; gap:14px; align-items:flex-start; text-align:left;
+  background:var(--surface); color:var(--ink);
+  border:1px solid var(--line); border-radius:14px; padding:18px 20px;
+  box-shadow:var(--shadow);
+  transition:border-color .15s ease, transform .15s ease, background .15s ease;
+  min-width:0;
+}
+.opt:hover{border-color:var(--accent); transform:translateY(-2px); background:var(--surface-2)}
+.opt-key{
+  font-family:var(--font-display); font-weight:700; font-size:20px; line-height:1.2;
+  color:var(--accent); flex:0 0 auto; padding-top:2px;
+}
+.opt-text{min-width:0; font-size:15.5px; line-height:1.65}
+
+/* 결과 화면 */
+.type-code{
+  font-family:var(--font-display); font-weight:700;
+  font-size:clamp(54px,15vw,84px); line-height:1; letter-spacing:.06em;
+  color:var(--accent);
+}
+.type-nick{font-size:clamp(21px,5vw,26px)}
+.type-desc{font-size:15.5px; color:var(--ink-soft)}
+.axes{display:flex; flex-direction:column; gap:14px; padding:22px 20px;
+  background:var(--surface); border:1px solid var(--line); border-radius:14px}
+.axis-row{display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; font-size:13px}
+.pole{color:var(--ink-soft); white-space:nowrap; font-variant-numeric:tabular-nums}
+.pole.win{color:var(--ink); font-weight:600}
+.track{height:8px; background:var(--accent-weak); border-radius:999px; overflow:hidden; position:relative}
+.track-fill{position:absolute; inset:0 auto 0 0; background:var(--accent); border-radius:999px}
+.notes{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px}
+.note{background:var(--surface-2); border:1px solid var(--line); border-radius:14px; padding:18px 20px; min-width:0}
+.note h3{font-size:14px; color:var(--accent); margin-bottom:6px; letter-spacing:.02em}
+.note p{font-size:14.5px; color:var(--ink-soft)}
+.actions{display:flex; flex-wrap:wrap; gap:10px}
+.btn-line{
+  background:var(--surface); color:var(--ink); border:1px solid var(--line);
+  padding:11px 22px; border-radius:999px; font-size:14.5px; font-weight:500;
+}
+.btn-line:hover{border-color:var(--accent); color:var(--accent)}
+.status{font-size:13.5px; color:var(--blue)}
+.review{border-top:1px solid var(--line); padding-top:16px}
+.review summary{cursor:pointer; font-size:14px; color:var(--ink-soft)}
+.review summary:hover{color:var(--accent)}
+.review ol{margin:14px 0 0; padding-left:20px; display:flex; flex-direction:column; gap:9px;
+  font-size:13.5px; color:var(--ink-soft)}
+.review b{color:var(--ink)}
+.foot{font-size:12.5px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:14px}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important; animation:none !important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="intro" class="screen">
+    <p class="eyebrow">연애 밸런스 게임 · 20문항</p>
+    <h1>애인의 MBTI 이상형</h1>
+    <p class="lede">MBTI가 “나는 어떤 사람인가”를 묻는다면, 이 테스트는 “나는 어떤 사람을 견딜 수 있는가”를 묻습니다. 스무 가지 상황에서 <b>더 화나는 쪽</b>을 고르면, 당신이 바라는 애인의 네 글자가 나옵니다.</p>
+    <ul class="howto">
+      <li>두 선택지 모두 짜증납니다. 덜 나쁜 쪽이 아니라 <b>더 화나는 쪽</b>을 고르세요.</li>
+      <li>네 축에 5문항씩 배분되어 있어 동점은 나오지 않습니다.</li>
+      <li>결과는 내 성격이 아니라 <b>내가 원하는 상대</b>의 성향입니다.</li>
+    </ul>
+    <button class="btn-primary" id="startBtn">시작하기</button>
+  </section>
+
+  <section id="quiz" class="screen" hidden>
+    <div class="meta">
+      <span class="qnum">Q <b id="qIndex">01</b> / 20</span>
+      <span class="tag" id="qTag">선물</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    <h2 class="q-title" id="qTitle"></h2>
+    <p class="q-sub">둘 중 <b>더 화나는 쪽</b>은?</p>
+    <div class="options">
+      <button class="opt" id="optA"><span class="opt-key">A</span><span class="opt-text"></span></button>
+      <button class="opt" id="optB"><span class="opt-key">B</span><span class="opt-text"></span></button>
+    </div>
+    <button class="btn-ghost" id="backBtn">← 이전 문항</button>
+  </section>
+
+  <section id="result" class="screen" hidden>
+    <p class="eyebrow">당신이 바라는 애인</p>
+    <div class="type-code" id="typeCode">ENFP</div>
+    <h2 class="type-nick" id="typeNick"></h2>
+    <p class="type-desc" id="typeDesc"></p>
+    <div class="axes" id="axes"></div>
+    <div class="notes">
+      <div class="note"><h3>조심할 점</h3><p id="typeWatch"></p></div>
+      <div class="note"><h3>가장 못 견디는 애인</h3><p id="typeAnti"></p></div>
+    </div>
+    <div class="actions">
+      <button class="btn-line" id="copyBtn">결과 복사</button>
+      <button class="btn-line" id="retryBtn">다시 하기</button>
+    </div>
+    <p class="status" id="copyStatus" hidden></p>
+    <details class="review">
+      <summary>내가 고른 20개 다시 보기</summary>
+      <ol id="reviewList"></ol>
+    </details>
+    <p class="foot">재미로 만든 설문입니다. 네 글자는 상대를 평가하는 기준이 아니라, 내가 무엇을 못 견디는지 알아보는 참고용으로 쓰세요.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // 각 선택지에는 "그 선택지를 고르면(= 더 화나면) 얻게 되는 점수"가 붙어 있다.
+  // A형 애인이 싫다 → B형 애인 쪽 성향에 1점.
+  var Q = [
+    {tag:"선물", axis:"NS", title:"애인이 100일 기념으로 준 선물",
+     a:{t:"밤새 종이로 접은 목걸이를 건네며 “정성이 중요하지”라고 말하는 유형", s:"S"},
+     b:{t:"당근에서 산 걸 숨기고 “새 거 샀어”라며 목걸이를 주는 유형", s:"N"}},
+    {tag:"편지", axis:"NS", title:"선물과 함께 건네는 편지",
+     a:{t:"2페이지짜리 정성 편지를 주고, 몇 번째 줄 몇 번째 단어였냐며 집요하게 시험하는 유형", s:"S"},
+     b:{t:"“사랑해” 단 한 단어만 적어 보내는 유형", s:"N"}},
+    {tag:"연락", axis:"EI", title:"하루 동안의 연락 빈도",
+     a:{t:"화장실 가는 것까지 보고하고, 5분 답장이 없으면 부재중 3통을 남기는 유형", s:"I"},
+     b:{t:"하루 카톡이 “ㅇㅇ”, “ㅋㅋ” 두 개가 전부고 전화는 다음 날 “잤어”로 끝나는 유형", s:"E"}},
+    {tag:"기념일", axis:"JP", title:"기념일을 챙기는 방식",
+     a:{t:"22일·33일·100일 전야제까지 챙기며 매번 이벤트와 선물을 기대하는 유형", s:"P"},
+     b:{t:"1주년 당일 저녁 8시에 “아, 오늘이었어?” 하는 유형", s:"J"}},
+    {tag:"데이트", axis:"JP", title:"데이트 코스를 정하는 방식",
+     a:{t:"분 단위 타임테이블을 짜오고, 10분 늦으면 일정 틀어졌다며 예민해지는 유형", s:"P"},
+     b:{t:"3년째 “아무거나”라고 하고는 막상 가면 시큰둥한 유형", s:"J"}},
+    {tag:"다툼", axis:"JP", title:"싸웠을 때의 태도",
+     a:{t:"새벽 4시까지 “오늘 안에 끝내야 한다”며 지난 대화를 전부 소환하는 유형", s:"P"},
+     b:{t:"읽씹하고 3일 잠수한 뒤 아무 일 없다는 듯 “밥 먹었어?” 하는 유형", s:"J"}},
+    {tag:"SNS", axis:"EI", title:"SNS에 드러나는 우리 관계",
+     a:{t:"자는 사진, 우는 사진까지 스토리에 올리고 모든 게시물에 나를 태그하는 유형", s:"I"},
+     b:{t:"2년을 사귀었는데 피드에 내 흔적이 0이고, 아는 사람을 만나면 “그냥 친구”라고 소개하는 유형", s:"E"}},
+    {tag:"과거", axis:"TF", title:"전 애인 이야기가 나왔을 때",
+     a:{t:"“전에 만나던 사람은 이럴 때 이랬는데”라는 비교를 습관처럼 하는 유형", s:"F"},
+     b:{t:"과거 연애는 전부 “기억 안 나”로 덮고 끝까지 숨기는 유형", s:"T"}},
+    {tag:"비용", axis:"TF", title:"데이트 비용을 다루는 방식",
+     a:{t:"매번 계산기를 두드려 1원 단위로 정산하고, 입금이 늦으면 리마인드를 보내는 유형", s:"F"},
+     b:{t:"선물 사주고 플렉스하다가 월말에 “카드값 좀 보태줄 수 있어?” 하는 유형", s:"T"}},
+    {tag:"친구", axis:"EI", title:"서로의 친구 관계",
+     a:{t:"내 친구 모임마다 따라와 옆자리를 사수하고 단톡방까지 들어오는 유형", s:"I"},
+     b:{t:"1년 넘게 자기 친구는 한 명도 안 보여주며 “겹치면 불편해”라고만 하는 유형", s:"E"}},
+    {tag:"질투", axis:"TF", title:"질투를 표현하는 방식",
+     a:{t:"이성 연락처 삭제를 요구하고 카톡 목록을 주기적으로 확인하는 유형", s:"T"},
+     b:{t:"내가 이성 친구와 1박 여행을 간다 해도 “응, 재밌게 놀다 와”로 끝나는 유형", s:"F"}},
+    {tag:"관찰", axis:"NS", title:"내 변화를 알아채는 정도",
+     a:{t:"매일 복붙한 듯 “오늘도 예쁘다/멋있다”라고 하지만 뭐가 어떻게 예쁜지는 대답 못 하는 유형", s:"S"},
+     b:{t:"머리를 20cm 자르고 염색까지 했는데 3주째 모르는 유형", s:"N"}},
+    {tag:"간병", axis:"TF", title:"내가 아플 때의 반응",
+     a:{t:"감기 기운이 있다니까 응급실로 끌고 가 보호자 행세를 하고 회사에까지 전화하는 유형", s:"T"},
+     b:{t:"응급실 다녀왔다는 말에 “약 먹어” 한 줄 보내고 다음 날 안부도 없는 유형", s:"F"}},
+    {tag:"미래", axis:"NS", title:"미래 이야기를 꺼내는 방식",
+     a:{t:"세 번째 데이트에서 결혼식장 견적과 아이 이름 후보를 공유하는 유형", s:"S"},
+     b:{t:"2년을 사귀고도 미래 얘기만 나오면 “지금이 좋잖아”로 매번 넘기는 유형", s:"N"}},
+    {tag:"사과", axis:"TF", title:"잘못했을 때 사과하는 방식",
+     a:{t:"무릎 꿇고 울며 과하게 자책해서 결국 내가 달래주게 만드는 유형", s:"T"},
+     b:{t:"“미안. 됐지?” 한마디 하고 바로 게임에 접속하는 유형", s:"F"}},
+    {tag:"취미", axis:"EI", title:"내 취미를 대하는 태도",
+     a:{t:"내 취미를 전부 따라 시작해서 나보다 잘하려 들고 훈수까지 두는 유형", s:"I"},
+     b:{t:"“그거 왜 해? 돈 아깝게”라며 한 번도 관심을 주지 않는 유형", s:"E"}},
+    {tag:"식사", axis:"NS", title:"집에서 함께 먹는 밥",
+     a:{t:"재료비 10만 원짜리 실험 요리를 차려놓고 30분간 맛 평가를 요구하는 유형", s:"S"},
+     b:{t:"1년 내내 배달만 시키고 메뉴 고르기도 결제도 전부 내 몫인 유형", s:"N"}},
+    {tag:"여행", axis:"JP", title:"둘이 떠나는 여행",
+     a:{t:"항공·숙소·식당을 혼자 다 정해 통보하고, 의견을 내면 “이미 결제했어”로 막는 유형", s:"P"},
+     b:{t:"공항에 도착해서야 “어디 갈지는 가서 정하자”라고 하고 숙소도 안 잡아둔 유형", s:"J"}},
+    {tag:"가족", axis:"EI", title:"가족에게 나를 소개하는 문제",
+     a:{t:"사귄 지 한 달 만에 부모님 댁에 데려가 상견례 분위기를 만드는 유형", s:"I"},
+     b:{t:"2년째 가족에게 내 존재를 숨기고 명절엔 아예 연락이 끊기는 유형", s:"E"}},
+    {tag:"사생활", axis:"JP", title:"휴대폰과 사생활의 경계",
+     a:{t:"자기 폰 비번을 알려주며 “서로 보는 거잖아”라고 매일 내 폰을 검사하는 유형", s:"P"},
+     b:{t:"폰을 늘 엎어두고 알림이 뜨면 급히 가리는 유형", s:"J"}}
+  ];
+
+  var AXES = [
+    {key:"EI", left:"E", right:"I", leftName:"표현하는", rightName:"조용한"},
+    {key:"NS", left:"N", right:"S", leftName:"의미 중심", rightName:"현실 중심"},
+    {key:"TF", left:"T", right:"F", leftName:"담백한", rightName:"다정한"},
+    {key:"JP", left:"J", right:"P", leftName:"계획적인", rightName:"유연한"}
+  ];
+
+  var TYPES = {
+    ISTJ:{nick:"「약속은 반드시 지키는 사람」",
+      desc:"말수는 적어도 한 번 뱉은 약속은 끝까지 지키는 애인을 원합니다. 화려한 이벤트보다 매달 같은 날 같은 자리에 나와 있는 쪽이 당신에겐 사랑의 증거입니다.",
+      watch:"당신이 원하는 안정이 상대에겐 “변화 없는 관계”로 느껴질 수 있습니다. 가끔은 당신이 먼저 변주를 제안해 보세요."},
+    ISFJ:{nick:"「티 안 나게 챙겨주는 사람」",
+      desc:"생색내지 않고 내 컵에 물을 채워두는 애인. 큰 고백 한 번보다 작은 돌봄이 매일 쌓이는 관계를 바랍니다.",
+      watch:"이런 사람은 서운함을 말하지 않고 모아둡니다. 괜찮냐고 먼저 물어봐 주는 쪽이 당신이어야 합니다."},
+    INFJ:{nick:"「말하지 않아도 알아채는 사람」",
+      desc:"내가 왜 기분이 상했는지 설명하기 전에 눈치채는 깊이를 원합니다. 대화의 밀도가 높고 관계를 진지하게 다루는 애인이 잘 맞습니다.",
+      watch:"그 깊이가 혼자 내린 결론이 될 때가 있습니다. 넘겨짚기 전에 확인하는 습관을 둘 다 가져야 합니다."},
+    INTJ:{nick:"「요란하지 않게 설계하는 사람」",
+      desc:"매일의 연락은 적어도 1년 뒤 계획에는 내가 분명히 들어 있는 애인. 즉흥적 애정 표현보다 일관된 방향을 신뢰합니다.",
+      watch:"온도가 낮게 느껴지는 날이 옵니다. 애정 표현은 요구해도 되는 것이고, 요구해야 돌아옵니다."},
+    ISTP:{nick:"「말보다 손이 먼저 나가는 사람」",
+      desc:"고장난 걸 말없이 고쳐두고, 힘들다고 하면 해결책부터 꺼내는 애인. 감정의 과장이 없는 담백함을 편하게 느낍니다.",
+      watch:"문제가 없을 땐 연락도 조용해집니다. 무소식이 서운함으로 번지기 전에 기준을 정해두세요."},
+    ISFP:{nick:"「분위기로 사랑하는 사람」",
+      desc:"플레이리스트와 사진, 조용한 산책으로 마음을 전하는 애인. 말로 다 설명하지 않아도 되는 편안함을 원합니다.",
+      watch:"결정을 미루는 편이라, 중요한 일은 당신이 먼저 못 박아야 굴러갑니다."},
+    INFP:{nick:"「편지 한 장에 마음을 다 쓰는 사람」",
+      desc:"조용하지만 속이 깊고, 기념일마다 글로 마음을 남기는 애인. 관계의 의미를 함께 되새기는 걸 좋아합니다.",
+      watch:"상처를 혼자 오래 간직합니다. 다툰 다음 날 먼저 문을 두드리는 쪽이 당신이면 관계가 길어집니다."},
+    INTP:{nick:"「엉뚱하지만 거짓이 없는 사람」",
+      desc:"과장도 아부도 없이 솔직한 애인. 쓸데없는 이야기를 오래 나눠도 지루하지 않은 사이를 원합니다.",
+      watch:"기념일 개념이 희박합니다. 날짜는 공유 캘린더에 올려두는 편이 서로에게 평화롭습니다."},
+    ESTP:{nick:"「지금 당장 출발하는 사람」",
+      desc:"심심할 틈을 주지 않는 애인. 말이 나오면 그날 저녁에 떠나 있는 추진력에 끌립니다.",
+      watch:"즉흥이 반복되면 체력이 먼저 바닥납니다. 쉬는 주말은 미리 못 박아두세요."},
+    ESFP:{nick:"「같이 있으면 웃게 되는 사람」",
+      desc:"리액션이 크고 표현에 인색하지 않은 애인. 사랑한다는 말을 아끼지 않는 쪽이 당신에겐 안심입니다.",
+      watch:"진지한 대화의 문은 당신이 열어야 할 때가 많습니다."},
+    ENFP:{nick:"「매일 새로운 걸 들고 오는 사람」",
+      desc:"애정 표현이 솔직하고 열정적인 애인. 관계가 정체되는 순간을 가장 견디기 힘들어하는 당신과 잘 맞습니다.",
+      watch:"열정의 온도 차가 큽니다. 식었다고 느껴지는 시기를 미리 각오해 두면 덜 흔들립니다."},
+    ENTP:{nick:"「대화가 지루하지 않은 사람」",
+      desc:"토론하듯 떠드는 게 즐거운 애인. 생각이 빠르고 농담이 많은 사람에게서 매력을 느낍니다.",
+      watch:"말싸움이 진심의 상처로 번지지 않도록, 건드리면 안 되는 선은 미리 합의해 두세요."},
+    ESTJ:{nick:"「계획이 곧 애정인 사람」",
+      desc:"데이트도 미래도 분명하게 정리해 오는 애인. 흐지부지되는 관계를 가장 싫어하는 당신에게 믿음을 줍니다.",
+      watch:"정리가 통보가 되는 순간 숨이 막힙니다. “어때?”라는 한마디를 요구하세요."},
+    ESFJ:{nick:"「내 사람들까지 챙기는 사람」",
+      desc:"내 친구와 가족에게도 잘하는 애인. 관계를 숨기지 않고 함께 드러내는 태도에 안정감을 느낍니다.",
+      watch:"모두에게 잘해서 가끔 서운해집니다. 둘만의 시간은 따로 떼어두세요."},
+    ENFJ:{nick:"「나를 더 나은 사람으로 만드는 사람」",
+      desc:"응원과 피드백을 아끼지 않는 애인. 함께 성장한다는 감각을 연애에서 중요하게 봅니다.",
+      watch:"기대가 과해지면 애정이 과제처럼 느껴집니다. 아무것도 안 하는 날도 허락해 주세요."},
+    ENTJ:{nick:"「끌고 가는 사람」",
+      desc:"결정이 빠르고 자기 말에 책임지는 애인. 우물쭈물하는 태도를 못 견디는 당신에게 시원한 상대입니다.",
+      watch:"연애가 프로젝트가 되지 않도록, 효율을 따지지 않는 시간을 일부러 만드세요."}
+  };
+
+  var OPP = {E:"I", I:"E", N:"S", S:"N", T:"F", F:"T", J:"P", P:"J"};
+
+  var el = {
+    intro: document.getElementById("intro"),
+    quiz: document.getElementById("quiz"),
+    result: document.getElementById("result"),
+    startBtn: document.getElementById("startBtn"),
+    qIndex: document.getElementById("qIndex"),
+    qTag: document.getElementById("qTag"),
+    qTitle: document.getElementById("qTitle"),
+    barFill: document.getElementById("barFill"),
+    optA: document.getElementById("optA"),
+    optB: document.getElementById("optB"),
+    backBtn: document.getElementById("backBtn"),
+    typeCode: document.getElementById("typeCode"),
+    typeNick: document.getElementById("typeNick"),
+    typeDesc: document.getElementById("typeDesc"),
+    typeWatch: document.getElementById("typeWatch"),
+    typeAnti: document.getElementById("typeAnti"),
+    axes: document.getElementById("axes"),
+    reviewList: document.getElementById("reviewList"),
+    copyBtn: document.getElementById("copyBtn"),
+    copyStatus: document.getElementById("copyStatus"),
+    retryBtn: document.getElementById("retryBtn")
+  };
+
+  var picks = [];   // "a" | "b"
+  var idx = 0;
+  var lastCode = "";
+
+  function show(name){
+    el.intro.hidden = name !== "intro";
+    el.quiz.hidden = name !== "quiz";
+    el.result.hidden = name !== "result";
+    window.scrollTo({top:0, behavior:"auto"});
+  }
+
+  function pad(n){ return n < 10 ? "0" + n : String(n); }
+
+  function render(){
+    var q = Q[idx];
+    el.qIndex.textContent = pad(idx + 1);
+    el.qTag.textContent = q.tag;
+    el.qTitle.textContent = q.title;
+    el.optA.querySelector(".opt-text").textContent = q.a.t;
+    el.optB.querySelector(".opt-text").textContent = q.b.t;
+    el.barFill.style.width = ((idx) / Q.length * 100 + 5) + "%";
+    el.backBtn.hidden = idx === 0;
+  }
+
+  function score(){
+    var c = {E:0,I:0,N:0,S:0,T:0,F:0,J:0,P:0};
+    for (var i = 0; i < Q.length; i++){
+      var letter = Q[i][picks[i]].s;
+      c[letter] += 1;
+    }
+    return c;
+  }
+
+  function codeFrom(c){
+    return AXES.map(function(ax){
+      return c[ax.left] > c[ax.right] ? ax.left : ax.right;
+    }).join("");
+  }
+
+  function renderResult(){
+    var c = score();
+    var code = codeFrom(c);
+    lastCode = code;
+    var info = TYPES[code];
+    var anti = code.split("").map(function(ch){ return OPP[ch]; }).join("");
+
+    el.typeCode.textContent = code;
+    el.typeNick.textContent = info.nick;
+    el.typeDesc.textContent = info.desc;
+    el.typeWatch.textContent = info.watch;
+    el.typeAnti.textContent = anti + " " + TYPES[anti].nick + " 스타일. 스무 문항에서 당신이 가장 많이 걷어낸 조합입니다.";
+
+    el.axes.innerHTML = "";
+    AXES.forEach(function(ax){
+      var total = c[ax.left] + c[ax.right];
+      var pct = Math.round(c[ax.left] / total * 100);
+      var leftWin = c[ax.left] > c[ax.right];
+      var row = document.createElement("div");
+      row.className = "axis-row";
+      var l = document.createElement("span");
+      l.className = "pole" + (leftWin ? " win" : "");
+      l.textContent = ax.left + " " + ax.leftName + " " + c[ax.left];
+      var track = document.createElement("div");
+      track.className = "track";
+      var fill = document.createElement("div");
+      fill.className = "track-fill";
+      fill.style.width = pct + "%";
+      track.appendChild(fill);
+      var r = document.createElement("span");
+      r.className = "pole" + (leftWin ? "" : " win");
+      r.textContent = c[ax.right] + " " + ax.rightName + " " + ax.right;
+      row.appendChild(l); row.appendChild(track); row.appendChild(r);
+      el.axes.appendChild(row);
+    });
+
+    el.reviewList.innerHTML = "";
+    Q.forEach(function(q, i){
+      var li = document.createElement("li");
+      var head = document.createElement("b");
+      head.textContent = q.title + " — " + picks[i].toUpperCase() + ". ";
+      li.appendChild(head);
+      li.appendChild(document.createTextNode(q[picks[i]].t));
+      el.reviewList.appendChild(li);
+    });
+
+    el.copyStatus.hidden = true;
+    show("result");
+  }
+
+  function choose(key){
+    picks[idx] = key;
+    if (idx < Q.length - 1){ idx += 1; render(); }
+    else { renderResult(); }
+  }
+
+  el.startBtn.addEventListener("click", function(){
+    picks = []; idx = 0; render(); show("quiz");
+  });
+  el.optA.addEventListener("click", function(){ choose("a"); });
+  el.optB.addEventListener("click", function(){ choose("b"); });
+  el.backBtn.addEventListener("click", function(){
+    if (idx > 0){ idx -= 1; render(); }
+  });
+  el.retryBtn.addEventListener("click", function(){
+    picks = []; idx = 0; render(); show("quiz");
+  });
+
+  el.copyBtn.addEventListener("click", function(){
+    var info = TYPES[lastCode];
+    var text = "내가 바라는 애인의 MBTI는 " + lastCode + " " + info.nick + "\n" + info.desc + "\n— 애인의 MBTI 이상형 테스트";
+    el.copyStatus.hidden = false;
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){
+        el.copyStatus.textContent = "결과를 복사했습니다.";
+      }).catch(function(){
+        el.copyStatus.textContent = "복사가 막혀 있습니다. 결과 화면을 직접 선택해 복사해 주세요.";
+      });
+    } else {
+      el.copyStatus.textContent = "복사가 막혀 있습니다. 결과 화면을 직접 선택해 복사해 주세요.";
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
